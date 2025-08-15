@@ -1,39 +1,87 @@
 #!/usr/bin/env python3
 import random
 import matplotlib.pyplot as plt
+import textwrap
+
+# CONFIG
+NUM_CARDS = 2
+GRID_SIZE = 5
+FREE_SPACE = 'free: Verspätung'
+TITLE = "Verspätungs-Bingo"
 
 
 # list of possible entries
-entries = ["one", 
-           "two two", 
-           "three", "rrr", "rgmsd", "msfsd", "fnfsndfns", 'dsaa', 'wqwfsdss', 'fafsafsafasfasfas', 'fdsfds']
+entries = ["Signalstörung",
+           "Arbeiten an der Strecke",
+           "Personen auf Gleisen",
+           "Halt durch belegten Bahnhof",
+           "Halt durch überholenden Zug",
+           "WC außer Betrieb",
+           "Reservierungsanzeigen defekt",
+           "Ersatzzug",
+           "Warten auf Fahrgäste eines anderen Zuges",
+           "Zugausfall",
+           "Anschlusszug wartet",
+           "Anschlusszug wartet nicht",
+           "Laute Menschen im Ruhebereich",
+           "Stark riechendes Essen",
+           "Witzige Lautsprecheransagen",
+           "Verspätung weil nur ein Gleis verfügbar ist",
+           "Komfort Check-In nicht verfügbar",
+           "Oberleitungstörung",
+           "Wagen fehlt",
+           "Geänderte Wagenreihung",
+           "Klima defekt",
+           "Kein Bordrestaurant",
+           "Keine Fahrradmitnahme möglich",
+           "Warten auf Zugpersonal",
+           "Zugpersonalausfall",
+           "Weichenstörung",
+           "Warten auf Gegenzug",
+           "Außerplanmäßiger Halt",
+           "Schreiende Kinder",
+           "Ersatzvekehr mit Bussen",
+           "Bombenentschärfung",
+           "Polizeikontrolle",
+           "Notarzteinsatz",
+           "Brand auf der Strecke",
+           "Sturmschäden",
+           "kein WLAN"
+]
+
+def wrap_text(text, width=15):
+    return "\n".join(textwrap.wrap(text, width=width))
+
 
 # generate grid and fill with entries
-def generate_card(entries, size=3, free_space='free', output_file='bingo_card.png'):
-    n_cells = size * size - (1 if free_space else 0) # FREE goes in the middle space of the grid
-    # check if there are enough entries to fill up all spaces without repetitions
-    # TODO break if fewer entries than size else continue
+def generate_card(entries, size=3, free_space='', output_file='bingo_card.png', title=None):
+    n_cells = size * size - (1 if free_space else 0)
 
+    if len(entries) < n_cells:
+        raise ValueError("Not enough entries to fill the bingo card.")
+
+    if free_space and size % 2 == 0:
+        raise ValueError("FREE space can only be used in odd-sized grids.")
+    
     selected = random.sample(entries, n_cells)
 
-    # Insert FREE space in the center if free_space wanted, else leave string empty in def above
-    # works only for size > 2
     if free_space:
-        # TODO only insert if size odd
         mid = size // 2
         selected.insert(mid * size + mid, free_space)
 
-    # Create figure and axis
     fig, ax = plt.subplots(figsize=(size, size))
     ax.set_axis_off()
+
+    if title:
+        fig.text(0.5, 1.02, title, ha='center', va='bottom', fontsize=16)
 
     # Draw grid and fill with text
     for i in range(size):
         for j in range(size):
             idx = i * size + j
-            text = selected[idx]
-            ax.text(j + 0.5, size - i - 0.5, text, ha='center', va='center', wrap=True, fontsize=10)
-            ax.add_patch(plt.Rectangle((j, size - i - 1), 1, 1, fill=False, edgecolor='red'))
+            wrapped = wrap_text(selected[idx], width=15) # keep in bounds of grid
+            ax.text(j + 0.5, size - i - 0.5, wrapped, ha='center', va='center', wrap=True, fontsize=5)
+            ax.add_patch(plt.Rectangle((j, size - i - 1), 1, 1, fill=False, edgecolor='black'))
 
     ax.set_xlim(0, size)
     ax.set_ylim(0, size)
@@ -41,4 +89,6 @@ def generate_card(entries, size=3, free_space='free', output_file='bingo_card.pn
     plt.savefig(output_file, dpi=300, bbox_inches='tight')
     plt.close()
 
-generate_card(entries, output_file='custom_bingo.png')
+for i in range(1, NUM_CARDS + 1):
+    filename = f"bingo_{i:02}.png"
+    generate_card(entries, size=GRID_SIZE, free_space=FREE_SPACE, output_file=filename, title=TITLE)

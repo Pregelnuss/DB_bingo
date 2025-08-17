@@ -2,13 +2,16 @@
 import random
 import matplotlib.pyplot as plt
 import textwrap
+import os
 
 # CONFIG
-NUM_CARDS = 2
-GRID_SIZE = 5
-FREE_SPACE = 'free: Verspätung'
+NUM_CARDS = 10
+GRID_SIZE = 3
+FREE_SPACE = 'free: Verspätung' # e.g. "free: Verspätung" or "" if grid size even
 TITLE = "Verspätungs-Bingo"
+SAVE_FOLDER = "3x3_bingo_cards"
 
+os.makedirs(SAVE_FOLDER, exist_ok=True)
 
 # list of possible entries
 entries = ["Signalstörung",
@@ -54,7 +57,7 @@ def wrap_text(text, width=15):
 
 
 # generate grid and fill with entries
-def generate_card(entries, size=3, free_space='', output_file='bingo_card.png', title=None):
+def generate_card(entries, size, free_space, output_file, title):
     n_cells = size * size - (1 if free_space else 0)
 
     if len(entries) < n_cells:
@@ -90,5 +93,6 @@ def generate_card(entries, size=3, free_space='', output_file='bingo_card.png', 
     plt.close()
 
 for i in range(1, NUM_CARDS + 1):
-    filename = f"bingo_{i:02}.png"
+    #filename = f"bingo_{i:02}.png"
+    filename = os.path.join(SAVE_FOLDER, f"bingo_{i:02}.png")
     generate_card(entries, size=GRID_SIZE, free_space=FREE_SPACE, output_file=filename, title=TITLE)
